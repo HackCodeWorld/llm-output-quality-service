@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package llm_quality;
+
+// gRPC 服务定义
+service LLMQualityService {
+  rpc Generate(GenerateRequest) returns (GenerateResponse);
+  rpc AutoCorrect(CodeCorrectRequest) returns (CodeCorrectResponse);
+}
+
+message CodeCorrectRequest {
+  string raw_code = 1;
+}
+
+message CodeCorrectResponse {
+  string formatted_code = 1;
+  bool syntax_ok = 2;
+  repeated string syntax_errors = 3;
+}
+
+// 请求结构：传入 prompt 和可选的 testcases
+// 支持两种用途：
+//    1. 只传 prompt → 服务端调用 LLM 模型生成 response
+//    2. 传 prompt + response → 服务端直接对 response 做 syntax/test 评估，不再调用 LLM
+// string raw_test_code ： Optional 兼容 HumanEval 那种整段 assert 测试 无则保持空
+message GenerateRequest {
+  string prompt = 1;
+  string response = 2;
+  string model_version = 3;
+  repeated TestCase test_cases = 4;
+  string raw_test_code = 5; 
+}
+
+// 单个 test case
+message TestCase {
+  string input = 1;
+  string expected = 2;
+}
+
+// 响应结构：返回代码、语法检查和测试结果
+// float exec_time_ms ：方便后期做性能 / 超时统计 默认 0 
+message GenerateResponse {
+  int32 sample_id = 1;
+  string code = 2;
+  bool syntax_ok = 3;
+  repeated string syntax_errors = 4;
+  repeated TestResult test_results = 5;
+  float exec_time_ms = 6
+}
+
+// 单个测试结果
+message TestResult {
+  string case_id = 1;
+  bool passed = 2;
+  repeated string errors = 3;
+}
+
+
