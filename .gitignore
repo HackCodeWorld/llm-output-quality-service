@@ -1,3 +1,9 @@
-venv/ # 忽略虚拟环境
-.DS_Store # 忽略 macOS 的 .DS_Store
-__pycache__/ # 忽略 Python 缓存（可选但推荐）
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+*.log
+.DS_Store

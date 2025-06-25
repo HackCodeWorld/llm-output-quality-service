@@ -1,6 +1,7 @@
 from typing import Tuple, List
+import ast
 import black
-from isort import code as isort_code, remove_unused_imports as remove_unused_imports_code
+from isort import code as isort_code
 import logging
 
 class AutoCorrector:
@@ -22,7 +23,7 @@ class AutoCorrector:
         
         # 3. 返回
         ok2, errs2 = self.check_syntax(formatted_code)
-        if not ok2:
+        if not ok2: 
             return formatted_code, False, errs2
         
         # 4. 删除未使用的导入
@@ -54,7 +55,7 @@ class AutoCorrector:
             self.logger.debug("格式化后代码: %s", formatted_code)
             return formatted_code
         
-        except Exception:
+        except Exception as e:
             self.logger.warning(f"Black 格式化失败：{e}")
             return raw_code
     
@@ -62,8 +63,5 @@ class AutoCorrector:
     def sort_imports(self, raw_code: str) -> str:
         return isort_code(raw_code)
     
-    # remove_unused_imports_helper 删除未使用的导入
-    def remove_unused_imports(self, raw_code: str) -> str:
-        return remove_unused_imports_code(raw_code)
-    
+
     

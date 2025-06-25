@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 import time
 from typing import List, Dict, Tuple
-from grpc_service.proto.llm_quality_pb2 import TestResult
+from backend.llm_quality_pb2 import TestResult
 import logging
 
 class TestRunner:
@@ -15,7 +15,7 @@ class TestRunner:
     logger = logging.getLogger(__name__)
 
     DOCKER_IMAGE = "python:3.10-slim"  # 轻量基础镜像
-    TIMEOUT_SEC = 1                    # 每个容器最大执行 1s
+    TIMEOUT_SEC = int(os.getenv("TIMEOUT_SEC", "5"))  # 默认 5 秒
 
     @staticmethod
     def run_structured_tests(code: str, test_cases: List[Dict]) -> Tuple[List[TestResult], float]:
