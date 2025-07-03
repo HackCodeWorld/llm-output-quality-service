@@ -52,7 +52,7 @@ class LLMClient:
         }
 
     def batch_generate_from_jsonl(self, jsonl_path, output_path="results.jsonl"):
-        with open(jsonl_path, "r", encoding="utf-8") as f, open(output_path, "w", encoding="utf-8") as out_f:
+        with open(jsonl_path, "r", encoding="utf-8") as f, open(output_path, "a", encoding="utf-8") as out_f:
             for line in f:
                 item = json.loads(line)
                 fields = self.extract_fields(item)
