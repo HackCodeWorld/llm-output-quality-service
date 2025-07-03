@@ -58,18 +58,19 @@ class LLMQualityService(LLMQualityServiceServicer):
         test_results = []
         exec_time_ms = 0.0
 
-        if request.raw_test_code:
-            # 用原始 test_code 评测
-            test_results, exec_time_ms = self.tester.run_raw_tests(
-                formatted_code, request.raw_test_code, request.entry_point
-            )
-        elif request.test_cases:
-            # 结构化 test_cases
+        # 优先判断 结构化 test_cases
+        if request.test_cases:  
             test_cases = [
                 {"case_id": f"case_{i}", "input": tc.input, "expected": tc.expected}
                 for i, tc in enumerate(request.test_cases)
             ]
             test_results, exec_time_ms = self.tester.run_structured_tests(formatted_code, test_cases)
+        
+        #  整段 用原始 test_code 评测
+        elif request.raw_test_code:
+            test_results, exec_time_ms = self.tester.run_raw_tests(
+                formatted_code, request.raw_test_code, request.entry_point
+            )
 
         # 3. 构造响应
         return GenerateResponse(
