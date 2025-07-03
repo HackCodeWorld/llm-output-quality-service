@@ -10,7 +10,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s",
     handlers=[
         logging.StreamHandler(),  # 控制台输出
-        # logging.FileHandler("service.log"),  # 若要输出到文件，取消注释
+        logging.FileHandler("service.log", mode="w"),  # 覆盖写入日志文件
     ]
 )
 
