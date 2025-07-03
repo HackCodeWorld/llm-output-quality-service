@@ -25,6 +25,7 @@ class TestRunner:
           - List[TestResult]: 每条 case 的执行结果
           - float: 所有 case 的累计耗时（ms）
         """
+        
         total_ms = 0.0
         results = []
         for tc in test_cases:
@@ -35,7 +36,9 @@ class TestRunner:
                       f"print('PASS')"
 
             passed, errors, ms = TestRunner._run_in_docker(payload)
+            
             total_ms += ms
+            
             results.append(TestResult(
                 case_id=tc["case_id"],
                 passed=passed,
@@ -44,15 +47,16 @@ class TestRunner:
         return results, total_ms
 
     @staticmethod
-    def run_raw_tests(code: str, raw_test_code: str) -> Tuple[List[TestResult], float]:
+    def run_raw_tests(code: str, raw_test_code: str, entry_point: str) -> Tuple[List[TestResult], float]:
         """
         raw_test_code: 一整段例如多条 assert/pytest 风格代码
         视为一个测试套件，case_id 用 'raw'
+        entry_point: 函数名儿
         :returns:
           - List[TestResult]: 单条 raw 用例的执行结果（case_id='raw'）
           - float: 该 raw 测试的耗时（ms）
         """
-        payload = f"{code}\n\n{raw_test_code}"
+        payload = f"{code}\n\n{raw_test_code}\n\ncheck({entry_point})"
         passed, errors, ms = TestRunner._run_in_docker(payload)
         return [TestResult(case_id="raw", passed=passed, errors=errors)], ms    
 
@@ -74,17 +78,19 @@ class TestRunner:
             "docker", "run", "--rm",
             "--network", "none",
             f"--memory=256m", f"--cpus=0.5",
+            # 宿主机临时文件挂载到容器内/code/test.py路径
             f"--volume={host_path}:/code/test.py:ro",
             TestRunner.DOCKER_IMAGE,
             "timeout", str(TestRunner.TIMEOUT_SEC),
             "python", "/code/test.py"
         ]
+        
         start = time.time()
+        
         try:
             output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True)
             elapsed = (time.time() - start) * 1000
             TestRunner.logger.debug("Docker 执行输出: %s", output)
-            
             # 如果输出中包含 PASS 则认为通过
             passed = "PASS" in output
             return passed, [], elapsed

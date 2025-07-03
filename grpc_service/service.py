@@ -11,14 +11,17 @@ class LLMQualityService(LLMQualityServiceServicer):
         
     def AutoCorrect(self, request, context):
         """
-        gRPC接口：代码自动修正
+        gRPC接口：代码自动修正（语法+格式化）
         参数:
             request: CodeCorrectRequest
             context: gRPC context
         返回:
             CodeCorrectResponse
         """
-        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(request.raw_code)
+        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(
+            request.raw_code, entry_point=request.entry_point, prompt=request.prompt
+        )
+        
         return CodeCorrectResponse(
             formatted_code = formatted_code,
             syntax_ok = syntax_ok,
@@ -40,14 +43,16 @@ class LLMQualityService(LLMQualityServiceServicer):
             return GenerateResponse(
                 code="",
                 syntax_ok=False,
+                
                 syntax_errors=["No code provided in response field."],
                 test_results=[],
                 exec_time_ms=0.0
             )
         
         # 1. 代码修正
-        code_to_check = request.response if request.response else request.prompt
-        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(code_to_check)
+        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(
+            request.response, entry_point=request.entry_point, prompt=request.prompt
+        )
 
         # 2. 测试执行
         test_results = []
@@ -55,7 +60,9 @@ class LLMQualityService(LLMQualityServiceServicer):
 
         if request.raw_test_code:
             # 用原始 test_code 评测
-            test_results, exec_time_ms = self.tester.run_raw_tests(formatted_code, request.raw_test_code)
+            test_results, exec_time_ms = self.tester.run_raw_tests(
+                formatted_code, request.raw_test_code, request.entry_point
+            )
         elif request.test_cases:
             # 结构化 test_cases
             test_cases = [

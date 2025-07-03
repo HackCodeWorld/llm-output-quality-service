@@ -15,13 +15,15 @@ class LLMClient:
                 prompt = item.get("prompt", "")
                 response = item.get("canonical_solution", "")
                 raw_test_code = item.get("test", "")
+                entry_point = item.get("entry_point", "")
                 req = GenerateRequest(
                     prompt=prompt,
                     response=response,
-                    raw_test_code=raw_test_code
+                    raw_test_code=raw_test_code,
+                    entry_point=entry_point
                 )
                 resp = self.stub.Generate(req)
-                print(resp)  # 你可以自定义处理
+                print(resp)  # 可自定义处理
 
     def close(self):
         self.channel.close()

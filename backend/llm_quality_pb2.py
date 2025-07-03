@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11llm_quality.proto\x12\x0bllm_quality\"&\n\x12\x43odeCorrectRequest\x12\x10\n\x08raw_code\x18\x01 \x01(\t\"W\n\x13\x43odeCorrectResponse\x12\x16\n\x0e\x66ormatted_code\x18\x01 \x01(\t\x12\x11\n\tsyntax_ok\x18\x02 \x01(\x08\x12\x15\n\rsyntax_errors\x18\x03 \x03(\t\"\x8c\x01\n\x0fGenerateRequest\x12\x0e\n\x06prompt\x18\x01 \x01(\t\x12\x10\n\x08response\x18\x02 \x01(\t\x12\x15\n\rmodel_version\x18\x03 \x01(\t\x12)\n\ntest_cases\x18\x04 \x03(\x0b\x32\x15.llm_quality.TestCase\x12\x15\n\rraw_test_code\x18\x05 \x01(\t\"+\n\x08TestCase\x12\r\n\x05input\x18\x01 \x01(\t\x12\x10\n\x08\x65xpected\x18\x02 \x01(\t\"\xa2\x01\n\x10GenerateResponse\x12\x11\n\tsample_id\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x11\n\tsyntax_ok\x18\x03 \x01(\x08\x12\x15\n\rsyntax_errors\x18\x04 \x03(\t\x12-\n\x0ctest_results\x18\x05 \x03(\x0b\x32\x17.llm_quality.TestResult\x12\x14\n\x0c\x65xec_time_ms\x18\x06 \x01(\x02\"=\n\nTestResult\x12\x0f\n\x07\x63\x61se_id\x18\x01 \x01(\t\x12\x0e\n\x06passed\x18\x02 \x01(\x08\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t2\xae\x01\n\x11LLMQualityService\x12G\n\x08Generate\x12\x1c.llm_quality.GenerateRequest\x1a\x1d.llm_quality.GenerateResponse\x12P\n\x0b\x41utoCorrect\x12\x1f.llm_quality.CodeCorrectRequest\x1a .llm_quality.CodeCorrectResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11llm_quality.proto\x12\x0bllm_quality\";\n\x12\x43odeCorrectRequest\x12\x10\n\x08raw_code\x18\x01 \x01(\t\x12\x13\n\x0b\x65ntry_point\x18\x02 \x01(\t\"W\n\x13\x43odeCorrectResponse\x12\x16\n\x0e\x66ormatted_code\x18\x01 \x01(\t\x12\x11\n\tsyntax_ok\x18\x02 \x01(\x08\x12\x15\n\rsyntax_errors\x18\x03 \x03(\t\"\xa1\x01\n\x0fGenerateRequest\x12\x0e\n\x06prompt\x18\x01 \x01(\t\x12\x10\n\x08response\x18\x02 \x01(\t\x12\x15\n\rmodel_version\x18\x03 \x01(\t\x12)\n\ntest_cases\x18\x04 \x03(\x0b\x32\x15.llm_quality.TestCase\x12\x15\n\rraw_test_code\x18\x05 \x01(\t\x12\x13\n\x0b\x65ntry_point\x18\x06 \x01(\t\"+\n\x08TestCase\x12\r\n\x05input\x18\x01 \x01(\t\x12\x10\n\x08\x65xpected\x18\x02 \x01(\t\"\xa2\x01\n\x10GenerateResponse\x12\x11\n\tsample_id\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\x12\x11\n\tsyntax_ok\x18\x03 \x01(\x08\x12\x15\n\rsyntax_errors\x18\x04 \x03(\t\x12-\n\x0ctest_results\x18\x05 \x03(\x0b\x32\x17.llm_quality.TestResult\x12\x14\n\x0c\x65xec_time_ms\x18\x06 \x01(\x02\"=\n\nTestResult\x12\x0f\n\x07\x63\x61se_id\x18\x01 \x01(\t\x12\x0e\n\x06passed\x18\x02 \x01(\x08\x12\x0e\n\x06\x65rrors\x18\x03 \x03(\t2\xae\x01\n\x11LLMQualityService\x12G\n\x08Generate\x12\x1c.llm_quality.GenerateRequest\x1a\x1d.llm_quality.GenerateResponse\x12P\n\x0b\x41utoCorrect\x12\x1f.llm_quality.CodeCorrectRequest\x1a .llm_quality.CodeCorrectResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,17 +22,17 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'llm_quality_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_CODECORRECTREQUEST']._serialized_start=34
-  _globals['_CODECORRECTREQUEST']._serialized_end=72
-  _globals['_CODECORRECTRESPONSE']._serialized_start=74
-  _globals['_CODECORRECTRESPONSE']._serialized_end=161
-  _globals['_GENERATEREQUEST']._serialized_start=164
-  _globals['_GENERATEREQUEST']._serialized_end=304
-  _globals['_TESTCASE']._serialized_start=306
-  _globals['_TESTCASE']._serialized_end=349
-  _globals['_GENERATERESPONSE']._serialized_start=352
-  _globals['_GENERATERESPONSE']._serialized_end=514
-  _globals['_TESTRESULT']._serialized_start=516
-  _globals['_TESTRESULT']._serialized_end=577
-  _globals['_LLMQUALITYSERVICE']._serialized_start=580
-  _globals['_LLMQUALITYSERVICE']._serialized_end=754
+  _globals['_CODECORRECTREQUEST']._serialized_end=93
+  _globals['_CODECORRECTRESPONSE']._serialized_start=95
+  _globals['_CODECORRECTRESPONSE']._serialized_end=182
+  _globals['_GENERATEREQUEST']._serialized_start=185
+  _globals['_GENERATEREQUEST']._serialized_end=346
+  _globals['_TESTCASE']._serialized_start=348
+  _globals['_TESTCASE']._serialized_end=391
+  _globals['_GENERATERESPONSE']._serialized_start=394
+  _globals['_GENERATERESPONSE']._serialized_end=556
+  _globals['_TESTRESULT']._serialized_start=558
+  _globals['_TESTRESULT']._serialized_end=619
+  _globals['_LLMQUALITYSERVICE']._serialized_start=622
+  _globals['_LLMQUALITYSERVICE']._serialized_end=796
 # @@protoc_insertion_point(module_scope)

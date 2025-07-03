@@ -2,7 +2,8 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from backend import llm_quality_pb2 as llm__quality__pb2
+from . import llm_quality_pb2 as llm__quality__pb2
+
 
 class LLMQualityServiceStub(object):
     """gRPC 服务定义

@@ -1,7 +1,7 @@
 import grpc
 import logging
 from concurrent import futures
-from llm_quality_pb2_grpc import add_LLMQualityServiceServicer_to_server
+from backend.llm_quality_pb2_grpc import add_LLMQualityServiceServicer_to_server
 from grpc_service.service import LLMQualityService
 
 # 日志统一配置模版
