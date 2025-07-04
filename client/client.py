@@ -1,8 +1,11 @@
 import json
 import grpc
+import sys
 from backend.llm_quality_pb2 import GenerateRequest, TestCase
 from backend.llm_quality_pb2_grpc import LLMQualityServiceStub
 from google.protobuf.json_format import MessageToDict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 
 # 命令行第一个参数：数据集类型（humaneval、mbpp、apps等）
 # 命令行第二个参数：jsonl 文件路径
@@ -32,7 +35,7 @@ class LLMClient:
                 if "==" in line
             ]
         },
-        # 可继续加扩展其他数据集...
+        # 可继续加扩展其他数据集..
     }
 
     def __init__(self, grpc_host="localhost", grpc_port=50051, dataset_type="humaneval"):
@@ -43,6 +46,7 @@ class LLMClient:
     def extract_fields(self, item):
         if self.dataset_type in self.FIELD_ADAPTERS:
             return self.FIELD_ADAPTERS[self.dataset_type](item)
+        
         # fallback
         return {
             "prompt": item.get("prompt", ""),
@@ -51,12 +55,13 @@ class LLMClient:
             "entry_point": item.get("entry_point", ""),
         }
 
-    def batch_generate_from_jsonl(self, jsonl_path, output_path="results.jsonl"):
+    def batch_generate_from_jsonl(self, jsonl_path, output_path="results.jsonl", max_workers=8):
+        lock = Lock()
         with open(jsonl_path, "r", encoding="utf-8") as f, open(output_path, "a", encoding="utf-8") as out_f:
-            for line in f:
-                item = json.loads(line)
+            items = [json.loads(line) for line in f]
+            
+            def eval_one(item):
                 fields = self.extract_fields(item)
-                # 只在 test_cases 非空时传 test_cases
                 if fields.get("test_cases"):
                     req = GenerateRequest(
                         prompt=fields["prompt"],
@@ -67,7 +72,6 @@ class LLMClient:
                             for tc in fields["test_cases"]
                         ]
                     )
-                # raw_test_code模式
                 else:
                     req = GenerateRequest(
                         prompt=fields["prompt"],
@@ -83,16 +87,23 @@ class LLMClient:
                     "test_results": [MessageToDict(tr) for tr in resp.test_results],
                     "exec_time_ms": resp.exec_time_ms
                 }
-                print(json.dumps(result, ensure_ascii=False))
-                out_f.write(json.dumps(result, ensure_ascii=False) + "\n")
+                return result
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = [executor.submit(eval_one, item) for item in items]
+                for future in as_completed(futures):
+                    result = future.result()
+                    print(json.dumps(result, ensure_ascii=False))
+                    with lock:
+                        out_f.write(json.dumps(result, ensure_ascii=False) + "\n")
                 
     def close(self):
         self.channel.close()
 
 if __name__ == "__main__":
-    import sys
     dataset_type = sys.argv[1] if len(sys.argv) > 1 else "humaneval"
     jsonl_path = sys.argv[2] if len(sys.argv) > 2 else "data/humaneval_164.jsonl"
+    max_workers = int(sys.argv[3]) if len(sys.argv) > 3 else 8
     client = LLMClient(dataset_type=dataset_type)
-    client.batch_generate_from_jsonl(jsonl_path, output_path="results.jsonl")
+    client.batch_generate_from_jsonl(jsonl_path, output_path="results.jsonl", max_workers=max_workers)
     client.close()

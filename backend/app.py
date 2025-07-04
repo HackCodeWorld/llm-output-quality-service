@@ -14,8 +14,8 @@ logging.basicConfig(
         RotatingFileHandler(
             "service.log",           # 日志文件名
             mode="a",                # 追加写入
-            maxBytes=20*1024*1024,   # 单个日志文件最大20MB
-            backupCount=10,          # 最多保留10个历史日志文件
+            maxBytes=5*1024*1024,   # 单个日志文件最大5MB
+            backupCount=1,          # 最多保留1个历史日志文件
             encoding="utf-8"
         ),
     ]
