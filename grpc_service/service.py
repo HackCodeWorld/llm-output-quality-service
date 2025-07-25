@@ -49,14 +49,12 @@ class LLMQualityService(LLMQualityServiceServicer):
                 exec_time_ms=0.0
             )
         
-        # 1. 代码修正
-        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(
-            request.response, entry_point=request.entry_point, prompt=request.prompt
-        )
 
-        # 2. 测试执行
+        # 1. 先在原始代码上执行测试，计算 pass@k
         test_results = []
         exec_time_ms = 0.0
+        
+        is_humaneval = False
 
         # 优先判断 结构化 test_cases
         if request.test_cases:  
@@ -64,14 +62,30 @@ class LLMQualityService(LLMQualityServiceServicer):
                 {"case_id": f"case_{i}", "input": tc.input, "expected": tc.expected}
                 for i, tc in enumerate(request.test_cases)
             ]
-            test_results, exec_time_ms = self.tester.run_structured_tests(formatted_code, test_cases)
-        
-        #  整段 用原始 test_code 评测
+            test_results, exec_time_ms = self.tester.run_structured_tests(request.response, test_cases)
+       
         elif request.raw_test_code:
-            test_results, exec_time_ms = self.tester.run_raw_tests(
-                formatted_code, request.raw_test_code, request.entry_point
-            )
-
+            if request.prompt and not request.test_cases:
+                is_humaneval = True
+                test_results, exec_time_ms = self.tester.run_humaneval_test(
+                    request.prompt,
+                    request.response,
+                    request.raw_test_code,
+                    request.entry_point,
+                )
+            else:
+                test_results, exec_time_ms = self.tester.run_raw_tests(
+                    request.response, request.raw_test_code, request.entry_point
+                )
+            
+        # 2. 测试完成后再执行代码修正（格式化+语法）
+        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(
+            request.response,
+            entry_point=request.entry_point,
+            prompt=request.prompt,
+            humaneval=is_humaneval,
+        )
+        
         # 3. 构造响应
         return GenerateResponse(
             code=formatted_code,

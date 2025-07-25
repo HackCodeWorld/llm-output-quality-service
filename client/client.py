@@ -18,7 +18,8 @@ class LLMClient:
             "response": item.get("canonical_solution", ""),
             "raw_test_code": item.get("test", ""),
             "entry_point": item.get("entry_point", ""),
-            "test_cases": [] # keypoint：不要传 test_cases
+            "task_id": item.get("task_id"),
+            "test_cases": []  # keypoint：不要传 test_cases
         },
         # 单测模式
         "mbpp": lambda item: {
@@ -26,6 +27,7 @@ class LLMClient:
             "response": item.get("code", ""),
             "raw_test_code": "",  # keypoint：不要传 raw_test_code
             "entry_point": item.get("entry_point", ""),
+            "task_id": item.get("task_id"),
             "test_cases": [
                 {
                     "input": line.split("==")[0].replace("assert", "").strip(),
@@ -53,6 +55,7 @@ class LLMClient:
             "response": item.get("response", item.get("code", "")),
             "raw_test_code": item.get("test", ""),
             "entry_point": item.get("entry_point", ""),
+            "task_id": item.get("task_id"),
         }
 
     def batch_generate_from_jsonl(self, jsonl_path, output_path="results.jsonl", max_workers=8):
@@ -82,6 +85,7 @@ class LLMClient:
                     
                 resp = self.stub.Generate(req)
                 result = {
+                    "task_id": fields.get("task_id"),
                     "code": resp.code,
                     "syntax_ok": resp.syntax_ok,
                     "test_results": [MessageToDict(tr) for tr in resp.test_results],
@@ -102,7 +106,7 @@ class LLMClient:
 
 if __name__ == "__main__":
     dataset_type = sys.argv[1] if len(sys.argv) > 1 else "humaneval"
-    jsonl_path = sys.argv[2] if len(sys.argv) > 2 else "data/humaneval_164.jsonl"
+    jsonl_path = sys.argv[2] if len(sys.argv) > 2 else "data/humaneval_llm_batch.jsonl"
     max_workers = int(sys.argv[3]) if len(sys.argv) > 3 else 8
     client = LLMClient(dataset_type=dataset_type)
     client.batch_generate_from_jsonl(jsonl_path, output_path="results.jsonl", max_workers=max_workers)

@@ -11,7 +11,11 @@ class AutoCorrector:
         self.logger = logging.getLogger(__name__)
 
     def auto_correct_code(
-        self, raw_code: str, entry_point: str = "", prompt: str = ""
+        self,
+        raw_code: str,
+        entry_point: str = "",
+        prompt: str = "",
+        humaneval: bool = False,
     ) -> Tuple[str, bool, List[str]]:
         """
         代码修正主入口：
@@ -21,6 +25,14 @@ class AutoCorrector:
         - 兜底：entry_point 兜底（如有），否则直接报错
         """
         code = raw_code.strip()
+        
+        if humaneval:
+            # 对 HumanEval，只对函数体做语法检查，不尝试补全函数定义
+            code_dedented = textwrap.dedent(code)
+            dummy = f"def _temp():\n{textwrap.indent(code_dedented, '    ')}"
+            syntax_ok, errors = self.check_syntax(dummy)
+            return code, syntax_ok, errors
+        
         # 1. 提取所有 import 行（去重，补缺失）
         code_imports = self.extract_import_lines(code)
         prompt_imports = self.extract_import_lines(prompt)
