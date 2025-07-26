@@ -1,3 +1,5 @@
+import os
+import textwrap
 from backend.llm_quality_pb2 import GenerateResponse, CodeCorrectResponse, TestResult
 from backend.llm_quality_pb2_grpc import LLMQualityServiceServicer
 from grpc_service.auto_corrector import AutoCorrector
@@ -78,13 +80,22 @@ class LLMQualityService(LLMQualityServiceServicer):
                     request.response, request.raw_test_code, request.entry_point
                 )
             
-        # 2. 测试完成后再执行代码修正（格式化+语法）
-        formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(
-            request.response,
-            entry_point=request.entry_point,
-            prompt=request.prompt,
-            humaneval=is_humaneval,
-        )
+        # 2. 测试完成后再执行代码修正（格式化+语法），可通过环境变量关闭
+        if self.disable_autocorrect:
+            formatted_code = request.response
+            if is_humaneval:
+                code_dedented = textwrap.dedent(request.response)
+                dummy = f"def _temp():\n{textwrap.indent(code_dedented, '    ')}"
+                syntax_ok, syntax_errors = self.corrector.check_syntax(dummy)
+            else:
+                syntax_ok, syntax_errors = self.corrector.check_syntax(request.response)
+        else:
+            formatted_code, syntax_ok, syntax_errors = self.corrector.auto_correct_code(
+                request.response,
+                entry_point=request.entry_point,
+                prompt=request.prompt,
+                humaneval=is_humaneval,
+            )
         
         # 3. 构造响应
         return GenerateResponse(

@@ -9,3 +9,4 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - PYTHONPATH=/app
+    command: ["python", "backend/app.py"]

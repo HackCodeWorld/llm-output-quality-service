@@ -87,6 +87,7 @@ class LLMClient:
                 result = {
                     "task_id": fields.get("task_id"),
                     "code": resp.code,
+                    "raw_code": fields.get("response"),
                     "syntax_ok": resp.syntax_ok,
                     "test_results": [MessageToDict(tr) for tr in resp.test_results],
                     "exec_time_ms": resp.exec_time_ms
